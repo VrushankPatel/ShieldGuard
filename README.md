@@ -54,8 +54,10 @@ ShieldGuard/
     │   ├── admin-auth-session.e2e.test.js
     │   ├── root-auth.e2e.test.js
     │   └── root-bootstrap-hardening.e2e.test.js
-    └── onboarding/
-        └── tenant-onboarding.e2e.test.js
+    ├── onboarding/
+    │   └── tenant-onboarding.e2e.test.js
+    └── visitor/
+        └── visitor-gatepass-flows.e2e.test.js
 ```
 
 ## Environment Configuration
@@ -74,6 +76,8 @@ Important variables:
 | `SHIELD_ENV_FILE` | SHIELD env file path consumed by `run.sh` (`../dev.env` or `../prod.env`). |
 | `SHIELD_ROOT_PASSWORD` | Root password. If empty, ShieldGuard reads bootstrap credential file. |
 | `SHIELD_ROOT_CREDENTIAL_FILE` | Path to `root-bootstrap-credential.txt`. |
+| `SHIELD_ADMIN_EMAIL` | Optional tenant admin email for suites that need tenant-scoped role testing. |
+| `SHIELD_ADMIN_PASSWORD` | Optional tenant admin password for strict environments where root onboarding is blocked. |
 
 ## How Runtime Boot Works
 
@@ -111,6 +115,12 @@ Run only billing/payment OpenAPI smoke checks:
 
 ```bash
 npm run test:e2e:billing
+```
+
+Run only visitor/gate-pass scenario checks:
+
+```bash
+npm run test:e2e:visitor
 ```
 
 ## Crash Triage Workflow
@@ -174,6 +184,15 @@ If SHIELD becomes unstable during test runs:
 - `returns contract-aligned responses for root-authenticated billing/payment smoke calls`
   - Verifies root-authenticated smoke calls return expected status and API envelope.
   - Emits endpoint-specific mismatch summaries when status/envelope diverge from contract expectations.
+
+### `visitor-gatepass-flows.e2e.test.js`
+
+- `runs resident-to-security gate workflow with explicit role boundaries`
+  - Covers resident pass creation, security-only entry/exit logging, and final pass status transitions.
+  - Validates resident cannot log visitor entry while security can.
+  - In strict environments where root onboarding is blocked, emits actionable setup guidance for `SHIELD_ADMIN_EMAIL` and `SHIELD_ADMIN_PASSWORD`.
+- `blocks unauthenticated visitor pass creation requests`
+  - Verifies unauthenticated callers cannot create visitor passes.
 
 ## Notes
 

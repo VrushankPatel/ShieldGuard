@@ -52,7 +52,9 @@ function loadConfig() {
     rootPassword: process.env.SHIELD_ROOT_PASSWORD || '',
     rootCredentialFilePath: credentialFilePath,
     rootEmail: process.env.SHIELD_ROOT_EMAIL || 'root@shield.local',
-    rootMobile: process.env.SHIELD_ROOT_MOBILE || '+911234567890'
+    rootMobile: process.env.SHIELD_ROOT_MOBILE || '+911234567890',
+    adminEmail: process.env.SHIELD_ADMIN_EMAIL || '',
+    adminPassword: process.env.SHIELD_ADMIN_PASSWORD || ''
   };
 }
 

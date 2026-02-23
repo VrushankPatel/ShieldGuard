@@ -166,12 +166,14 @@ npm run test:e2e:amenities-meeting
 GitHub Actions workflow: `.github/workflows/ci.yml`
 
 - Triggers on pull requests to `master` and pushes to `master`.
-- Checks out both repositories:
-  - `ShieldGuard` (this repo)
-  - `shield` backend (for runtime + API under test)
-- Builds SHIELD backend jar with Maven.
-- Runs `npm run test:e2e` with ShieldGuard diagnostics enabled.
-- Always uploads diagnostics artifacts (`reports/` and generated topology configs), including failure-context snapshots when runs fail.
+- `Pipeline Smoke Gate` job always runs:
+  - dependency install
+  - test-discovery check (`jest --listTests`)
+  - diagnostics snapshot artifact upload
+- `External SHIELD E2E` job runs only when repository variable `SHIELD_BASE_URL` is configured:
+  - executes `npm run test:e2e` against that host
+  - uses optional secrets (`SHIELD_ROOT_PASSWORD`, `SHIELD_ADMIN_EMAIL`, `SHIELD_ADMIN_PASSWORD`, `SHIELD_OTP_TEST_CODE`)
+  - uploads diagnostics artifacts on success/failure
 
 ## Contributor Workflow
 

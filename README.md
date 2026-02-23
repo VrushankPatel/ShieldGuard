@@ -48,6 +48,8 @@ ShieldGuard/
 │       ├── rootAuth.js
 │       └── rootCredential.js
 └── tests/
+    ├── amenities-meeting/
+    │   └── amenities-meeting-flows.e2e.test.js
     ├── asset-complaint/
     │   └── asset-complaint-workflows.e2e.test.js
     ├── billing/
@@ -148,6 +150,12 @@ Run only asset/complaint workflow checks:
 npm run test:e2e:asset-complaint
 ```
 
+Run only amenities and meeting lifecycle checks:
+
+```bash
+npm run test:e2e:amenities-meeting
+```
+
 ## Crash Triage Workflow
 
 If SHIELD becomes unstable during test runs:
@@ -239,6 +247,16 @@ If SHIELD becomes unstable during test runs:
 - `rejects invalid asset references in complaint workflows`
   - Verifies complaint creation with invalid asset IDs is rejected.
   - Verifies missing asset lookup returns `404`.
+
+### `amenities-meeting-flows.e2e.test.js`
+
+- `drives amenity booking lifecycle with approval and availability checks`
+  - Creates amenity, books slot, approves booking, validates overlap availability signal, and completes booking.
+- `rejects overlapping amenity bookings and missing meeting minutes lookups`
+  - Verifies overlapping booking creation is rejected.
+  - Verifies minutes lookup is rejected when no minutes exist for a meeting.
+- `executes meeting start, minutes publish, approval, and closure flow`
+  - Covers meeting status progression (`SCHEDULED -> ONGOING -> COMPLETED`), minutes creation/approval, and reminder lifecycle.
 
 ## Notes
 

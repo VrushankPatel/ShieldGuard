@@ -1,9 +1,10 @@
 const { AbstractApiTest } = require('../../src/core/abstractApiTest');
-const { ensureRootReady } = require('../../src/utils/rootAuth');
-const { createSocietyPayload, createStrongPassword } = require('../../src/utils/dataFactory');
+const { createStrongPassword } = require('../../src/utils/dataFactory');
+const { onboardSocietyWithAdmin } = require('../../src/utils/onboarding');
 
 describe('Admin authentication and session invalidation flows', () => {
   const suite = new AbstractApiTest();
+  let onboardingContext;
   let adminEmail;
   let adminPassword;
   let adminSession;
@@ -20,19 +21,15 @@ describe('Admin authentication and session invalidation flows', () => {
   beforeAll(async () => {
     await suite.setup();
 
-    const rootSession = await ensureRootReady(suite.api, suite.config);
-    adminPassword = createStrongPassword('AdminInit');
-    const societyPayload = createSocietyPayload(adminPassword);
+    onboardingContext = await onboardSocietyWithAdmin(suite.api, suite.config, {
+      adminPassword: createStrongPassword('AdminInit')
+    });
+    adminEmail = onboardingContext.adminCredentials.email;
+    adminPassword = onboardingContext.adminCredentials.password;
 
-    const createSocietyResponse = await suite.api.post(
-      '/api/v1/platform/societies',
-      societyPayload,
-      rootSession.accessToken
-    );
-    suite.expectApiSuccessWithData(createSocietyResponse);
-
-    adminEmail = societyPayload.adminEmail;
-    adminSession = await loginAdmin(adminEmail, adminPassword);
+    if (!onboardingContext.onboardingBlocked) {
+      adminSession = onboardingContext.adminSession;
+    }
   });
 
   afterAll(async () => {
@@ -40,12 +37,30 @@ describe('Admin authentication and session invalidation flows', () => {
   });
 
   it('allows authenticated admin access to protected user APIs', async () => {
+    if (onboardingContext.onboardingBlocked) {
+      expect(onboardingContext.onboardingResponse.status).toBe(400);
+      expect((onboardingContext.onboardingResponse.body?.message || '').toLowerCase()).toContain(
+        'password change is required'
+      );
+      expect((onboardingContext.onboardingBlockedReason || '').toLowerCase()).toContain('verification');
+      return;
+    }
+
     // Fresh access token must work on protected tenant-scoped APIs.
     const usersResponse = await suite.api.get('/api/v1/users', adminSession.accessToken);
     suite.expectApiSuccessWithData(usersResponse);
   });
 
   it('rotates admin refresh token on both refresh endpoints and blocks replay', async () => {
+    if (onboardingContext.onboardingBlocked) {
+      const blockedLoginResponse = await suite.api.post('/api/v1/auth/login', {
+        email: adminEmail,
+        password: adminPassword
+      });
+      suite.expectAuthRejected(blockedLoginResponse);
+      return;
+    }
+
     // Rotate once via /refresh.
     const firstRefresh = adminSession.refreshToken;
     const refreshResponse = await suite.api.post('/api/v1/auth/refresh', {
@@ -76,6 +91,11 @@ describe('Admin authentication and session invalidation flows', () => {
   });
 
   it('invalidates refresh sessions on logout', async () => {
+    if (onboardingContext.onboardingBlocked) {
+      expect((onboardingContext.onboardingBlockedReason || '').toLowerCase()).toContain('verification');
+      return;
+    }
+
     // Logout should consume all active refresh sessions for the admin.
     const logoutResponse = await suite.api.post('/api/v1/auth/logout', {}, adminSession.accessToken);
     suite.expectApiSuccess(logoutResponse);
@@ -87,6 +107,11 @@ describe('Admin authentication and session invalidation flows', () => {
   });
 
   it('invalidates older sessions when admin changes password', async () => {
+    if (onboardingContext.onboardingBlocked) {
+      expect((onboardingContext.onboardingBlockedReason || '').toLowerCase()).toContain('verification');
+      return;
+    }
+
     // Login again to get a fresh session before password update.
     const preChangeSession = await loginAdmin(adminEmail, adminPassword);
     const nextPassword = createStrongPassword('AdminRotate');

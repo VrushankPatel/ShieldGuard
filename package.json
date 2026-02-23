@@ -22,6 +22,8 @@
     "test:e2e:utility-marketplace": "jest --runInBand --config jest.config.cjs tests/utility-marketplace/utility-marketplace-flows.e2e.test.js",
     "test:e2e:communication": "jest --runInBand --config jest.config.cjs tests/communication/communication-flows.e2e.test.js",
     "test:e2e:config-document-analytics": "jest --runInBand --config jest.config.cjs tests/config-document-analytics/config-document-analytics-flows.e2e.test.js",
+    "test:e2e:role-matrix": "jest --runInBand --config jest.config.cjs tests/authorization/role-permission-matrix.e2e.test.js",
+    "test:e2e:edge-permutations": "jest --runInBand --config jest.config.cjs tests/edge-permutations/domain-edge-permutations.e2e.test.js",
     "test:e2e:watch": "jest --watch --config jest.config.cjs",
     "shield:start": "node scripts/shield-runtime.cjs start",
     "shield:stop": "node scripts/shield-runtime.cjs stop",

@@ -13,6 +13,7 @@
     "test:e2e:auth": "jest --runInBand --config jest.config.cjs tests/auth",
     "test:e2e:auth-otp-lockout": "jest --runInBand --config jest.config.cjs tests/auth/otp-lockout.e2e.test.js",
     "test:e2e:amenities-meeting": "jest --runInBand --config jest.config.cjs tests/amenities-meeting/amenities-meeting-flows.e2e.test.js",
+    "test:e2e:helpdesk-emergency": "jest --runInBand --config jest.config.cjs tests/helpdesk-emergency/helpdesk-emergency-flows.e2e.test.js",
     "test:e2e:billing": "jest --runInBand --config jest.config.cjs tests/billing/billing-payments-contract-smoke.e2e.test.js",
     "test:e2e:asset-complaint": "jest --runInBand --config jest.config.cjs tests/asset-complaint/asset-complaint-workflows.e2e.test.js",
     "test:e2e:visitor": "jest --runInBand --config jest.config.cjs tests/visitor/visitor-gatepass-flows.e2e.test.js",

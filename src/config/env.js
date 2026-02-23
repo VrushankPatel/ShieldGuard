@@ -54,7 +54,14 @@ function loadConfig() {
     rootEmail: process.env.SHIELD_ROOT_EMAIL || 'root@shield.local',
     rootMobile: process.env.SHIELD_ROOT_MOBILE || '+911234567890',
     adminEmail: process.env.SHIELD_ADMIN_EMAIL || '',
-    adminPassword: process.env.SHIELD_ADMIN_PASSWORD || ''
+    adminPassword: process.env.SHIELD_ADMIN_PASSWORD || '',
+    otpTestCode: process.env.SHIELD_OTP_TEST_CODE || '',
+    localPostgresContainer: process.env.SHIELD_LOCAL_POSTGRES_CONTAINER || '',
+    postgresDb: process.env.SHIELD_POSTGRES_DB || 'shield',
+    postgresUser: process.env.SHIELD_POSTGRES_USER || 'shield',
+    loginOtpMaxAttempts: parseInteger(process.env.SHIELD_LOGIN_OTP_MAX_ATTEMPTS, 5),
+    userLockoutMaxFailedAttempts: parseInteger(process.env.SHIELD_USER_LOCKOUT_MAX_FAILED_ATTEMPTS, 5),
+    userLockoutDurationMinutes: parseInteger(process.env.SHIELD_USER_LOCKOUT_DURATION_MINUTES, 30)
   };
 }
 

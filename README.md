@@ -54,6 +54,7 @@ ShieldGuard/
     │   └── billing-payments-contract-smoke.e2e.test.js
     ├── auth/
     │   ├── admin-auth-session.e2e.test.js
+    │   ├── otp-lockout.e2e.test.js
     │   ├── root-auth.e2e.test.js
     │   └── root-bootstrap-hardening.e2e.test.js
     ├── onboarding/
@@ -80,6 +81,10 @@ Important variables:
 | `SHIELD_ROOT_CREDENTIAL_FILE` | Path to `root-bootstrap-credential.txt`. |
 | `SHIELD_ADMIN_EMAIL` | Optional tenant admin email for suites that need tenant-scoped role testing. |
 | `SHIELD_ADMIN_PASSWORD` | Optional tenant admin password for strict environments where root onboarding is blocked. |
+| `SHIELD_OTP_TEST_CODE` | Optional OTP code override when your environment exposes a fixed test OTP. |
+| `SHIELD_LOCAL_POSTGRES_CONTAINER` | Optional explicit postgres container name for SG-0001 local DB helper. |
+| `SHIELD_POSTGRES_DB` | DB name used by SG-0001 local DB helper (`shield` by default). |
+| `SHIELD_POSTGRES_USER` | DB user used by SG-0001 local DB helper (`shield` by default). |
 
 ## How Runtime Boot Works
 
@@ -123,6 +128,18 @@ Run only visitor/gate-pass scenario checks:
 
 ```bash
 npm run test:e2e:visitor
+```
+
+Run auth-focused suites (includes OTP/lockout):
+
+```bash
+npm run test:e2e:auth
+```
+
+Run only OTP and lockout hardening checks:
+
+```bash
+npm run test:e2e:auth-otp-lockout
 ```
 
 Run only asset/complaint workflow checks:
@@ -173,6 +190,18 @@ If SHIELD becomes unstable during test runs:
   - Calls `/auth/change-password`.
   - Verifies old refresh token fails and old password login fails.
   - Verifies login succeeds with the new password.
+
+### `otp-lockout.e2e.test.js`
+
+- `sends OTP login challenge with stable response shape`
+  - Verifies challenge token structure, destination masking behavior, and expiry field presence.
+- `verifies OTP success path and rejects challenge replay`
+  - Verifies one-time OTP challenge semantics and replay rejection.
+  - Supports either `SHIELD_OTP_TEST_CODE` or local Postgres metadata override for deterministic execution.
+- `enforces invalid OTP attempt limits and challenge invalidation`
+  - Verifies invalid OTP attempts are rejected and challenge is invalidated after max attempts.
+- `locks account after failed password attempts and validates recovery path`
+  - Verifies lockout after threshold of wrong password attempts and validates recovery login path.
 
 ### `tenant-onboarding.e2e.test.js`
 

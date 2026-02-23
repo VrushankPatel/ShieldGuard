@@ -69,9 +69,23 @@ async function createUser(suite, accessToken, unitId, role, namePrefix) {
   }
 }
 
+async function createRoleSessions(suite, accessToken, unitId, roles = ['COMMITTEE', 'SECURITY', 'OWNER', 'TENANT']) {
+  const sessions = {}
+  const users = {}
+
+  for (const role of roles) {
+    const created = await createUser(suite, accessToken, unitId, role, `${role}RoleUser`)
+    users[role] = created.user
+    sessions[role] = await loginWithEmail(suite.api, created.credentials.email, created.credentials.password)
+  }
+
+  return { sessions, users }
+}
+
 module.exports = {
   ensureExpectedStatus,
   resolveAdminSession,
   skipIfSetupBlocked,
-  createUser
+  createUser,
+  createRoleSessions
 }

@@ -15,6 +15,8 @@ This suite currently targets:
 - utility monitoring and marketplace transaction flows
 - communication module lifecycle flows
 - config, document repository, and analytics governance flows
+- full role-permission matrix verification across business domains
+- exhaustive negative and edge permutation coverage across business domains
 - admin refresh token rotation (`/auth/refresh` and `/auth/refresh-token`)
 - session invalidation on logout
 - session invalidation on password change
@@ -61,6 +63,8 @@ ShieldGuard/
 └── tests/
     ├── accounting/
     │   └── accounting-treasury-flows.e2e.test.js
+    ├── authorization/
+    │   └── role-permission-matrix.e2e.test.js
     ├── amenities-meeting/
     │   └── amenities-meeting-flows.e2e.test.js
     ├── asset-complaint/
@@ -80,6 +84,8 @@ ShieldGuard/
     │   └── communication-flows.e2e.test.js
     ├── config-document-analytics/
     │   └── config-document-analytics-flows.e2e.test.js
+    ├── edge-permutations/
+    │   └── domain-edge-permutations.e2e.test.js
     ├── staff-payroll/
     │   └── staff-payroll-flows.e2e.test.js
     ├── utility-marketplace/
@@ -211,6 +217,18 @@ Run only config, document, and analytics lifecycle checks:
 
 ```bash
 npm run test:e2e:config-document-analytics
+```
+
+Run the full role-permission matrix suite:
+
+```bash
+npm run test:e2e:role-matrix
+```
+
+Run cross-domain negative and edge permutations:
+
+```bash
+npm run test:e2e:edge-permutations
 ```
 
 ## CI Pipeline
@@ -383,6 +401,26 @@ Detailed interpretation is documented in `docs/DIAGNOSTICS_GUIDE.md`.
   - Covers tenant config upsert/bulk update, module toggles, billing formula config, and document category/document lifecycle.
 - `drives report templates, scheduled reports, dashboards, and analytics endpoints`
   - Covers report template execution, scheduled report send-now, dashboard defaulting, and core analytics endpoint verification with seeded operational data.
+
+### `role-permission-matrix.e2e.test.js`
+
+- `enforces expected permissions for each role and unauthenticated callers`
+  - Verifies access behavior for `ADMIN`, `COMMITTEE`, `SECURITY`, `OWNER`, `TENANT`, and unauthenticated requests.
+  - Covers matrix checks across:
+    - accounting/treasury
+    - staff/payroll
+    - utility monitoring
+    - marketplace
+    - documents/files
+    - notifications
+    - config/settings
+    - analytics/reports
+
+### `domain-edge-permutations.e2e.test.js`
+
+- `covers validation failures, forbidden paths, and missing-resource permutations`
+  - Executes cross-domain negative and edge permutations for all core business domains.
+  - Includes malformed payloads, invalid UUIDs, forbidden-role actions, not-found resources, and unauthenticated access checks.
 
 ## Notes
 

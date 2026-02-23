@@ -46,9 +46,12 @@ ShieldGuard/
 │       ├── rootAuth.js
 │       └── rootCredential.js
 └── tests/
-    └── auth/
-        ├── admin-auth-session.e2e.test.js
-        └── root-auth.e2e.test.js
+    ├── auth/
+    │   ├── admin-auth-session.e2e.test.js
+    │   ├── root-auth.e2e.test.js
+    │   └── root-bootstrap-hardening.e2e.test.js
+    └── onboarding/
+        └── tenant-onboarding.e2e.test.js
 ```
 
 ## Environment Configuration
@@ -142,6 +145,15 @@ If SHIELD becomes unstable during test runs:
   - Calls `/auth/change-password`.
   - Verifies old refresh token fails and old password login fails.
   - Verifies login succeeds with the new password.
+
+### `tenant-onboarding.e2e.test.js`
+
+- `creates a society and tenant admin via root onboarding`
+  - Covers happy-path society onboarding via root APIs.
+  - For strict environments where root password rotation verification is intentionally blocked, asserts the onboarding gate (`password change is required`) with actionable failure details.
+- `allows onboarded admin login and protected route access in tenant scope`
+  - Validates `/users` and `/users/{id}` using newly onboarded admin credentials.
+  - In strict verification-gated environments, verifies admin login is rejected because onboarding is blocked.
 
 ## Notes
 

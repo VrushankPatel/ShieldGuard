@@ -1,6 +1,9 @@
 const { createStrongPassword } = require('./dataFactory');
 const { resolveRootPassword, setRootPasswordForSession } = require('./rootCredential');
 
+const MAX_ROOT_LOGIN_ATTEMPTS = 5;
+const ROOT_LOGIN_RETRY_DELAY_MS = 1000;
+
 function apiSucceeded(response) {
   return response.status === 200 && response.body && response.body.success === true;
 }
@@ -16,9 +19,30 @@ async function loginRoot(api, config, password) {
   });
 }
 
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function loginRootWithRetry(api, config, password) {
+  let lastResponse = null;
+
+  for (let attempt = 1; attempt <= MAX_ROOT_LOGIN_ATTEMPTS; attempt += 1) {
+    lastResponse = await loginRoot(api, config, password);
+    if (lastResponse.status !== 429) {
+      return lastResponse;
+    }
+
+    if (attempt < MAX_ROOT_LOGIN_ATTEMPTS) {
+      await wait(ROOT_LOGIN_RETRY_DELAY_MS * attempt);
+    }
+  }
+
+  return lastResponse;
+}
+
 async function ensureRootReady(api, config) {
   let currentPassword = resolveRootPassword(config);
-  let loginResponse = await loginRoot(api, config, currentPassword);
+  let loginResponse = await loginRootWithRetry(api, config, currentPassword);
   let bootstrapPasswordRotationApplied = false;
   let passwordRotationSkippedReason = null;
 
@@ -56,7 +80,7 @@ async function ensureRootReady(api, config) {
       }
 
       currentPassword = nextPassword;
-      loginResponse = await loginRoot(api, config, currentPassword);
+      loginResponse = await loginRootWithRetry(api, config, currentPassword);
       if (!apiSucceeded(loginResponse)) {
         throw new Error('Root login failed immediately after successful root password change.');
       }

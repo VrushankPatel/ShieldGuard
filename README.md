@@ -120,6 +120,15 @@ If SHIELD becomes unstable during test runs:
 - `rejects society onboarding for unauthenticated callers`
   - Verifies root-only onboarding endpoint cannot be called without root bearer token.
 
+### `root-bootstrap-hardening.e2e.test.js`
+
+- `resolves bootstrap credential and produces a valid root auth payload`
+  - Validates that ShieldGuard can resolve root credentials and obtain root auth tokens.
+  - Also validates environment-aware behavior when password rotation is blocked by verification policy.
+- `enforces password-change hardening by invalidating stale refresh sessions`
+  - Verifies stale refresh invalidation after root password rotation.
+  - In environments where verification is intentionally blocked (for example strict production-like settings), asserts actionable verification failure semantics.
+
 ### `admin-auth-session.e2e.test.js`
 
 - `allows authenticated admin access to protected user APIs`

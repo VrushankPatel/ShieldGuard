@@ -1,0 +1,39 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate-pr-body:
+    name: Validate PR template evidence
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR body for SG ticket and test proof
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = (context.payload.pull_request.body || '').trim()
+
+            const hasTicket = /SG-\d{4}|#\d+/.test(body)
+            const hasTestSection = /##\s*Test Evidence/i.test(body)
+            const hasCommandEvidence = /npm run|jest|node\s+scripts\//i.test(body)
+
+            if (!hasTicket || !hasTestSection || !hasCommandEvidence) {
+              const missing = []
+              if (!hasTicket) missing.push('linked SG ticket reference (SG-XXXX or #issue)')
+              if (!hasTestSection) missing.push('`## Test Evidence` section')
+              if (!hasCommandEvidence) missing.push('at least one executed test command (for example `npm run ...`)')
+
+              core.setFailed(
+                `PR quality gate failed. Missing: ${missing.join(', ')}. ` +
+                'Fill out the PR template sections before requesting review.'
+              )
+            }
+
+            core.info('PR template quality checks passed.')

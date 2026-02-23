@@ -83,6 +83,10 @@ Each PR should include:
 - risk notes (if any)
 - diagnostics artifacts path when failure analysis is involved
 
+Use the repository PR template at `.github/pull_request_template.md` and complete every field.
+
+Detailed execution expectations are documented in `docs/CONTRIBUTING.md`.
+
 ## Definition of done
 A ticket is done when:
 - implementation is complete

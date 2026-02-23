@@ -33,6 +33,7 @@ ShieldGuard/
 │   ├── run-e2e-with-diagnostics.cjs
 │   └── shield-runtime.cjs
 ├── docs/
+│   ├── CONTRIBUTING.md
 │   ├── DIAGNOSTICS_GUIDE.md
 │   ├── KANBAN_TICKETS_SG.md
 │   └── TEAM_ONBOARDING.md
@@ -171,6 +172,12 @@ GitHub Actions workflow: `.github/workflows/ci.yml`
 - Builds SHIELD backend jar with Maven.
 - Runs `npm run test:e2e` with ShieldGuard diagnostics enabled.
 - Always uploads diagnostics artifacts (`reports/` and generated topology configs), including failure-context snapshots when runs fail.
+
+## Contributor Workflow
+
+- Contributor process and branch conventions: `docs/CONTRIBUTING.md`
+- Team onboarding and access model: `docs/TEAM_ONBOARDING.md`
+- Pull request quality checklist: `.github/pull_request_template.md`
 
 ## Crash Triage Workflow
 

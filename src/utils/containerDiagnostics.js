@@ -200,8 +200,162 @@ function summarizeDiagnostics(diagnostics) {
   return lines.join('\n');
 }
 
+function compareDiagnostics(before, after) {
+  const beforeMap = new Map((before?.containers || []).map((container) => [container.name, container]))
+  const afterMap = new Map((after?.containers || []).map((container) => [container.name, container]))
+
+  const allNames = [...new Set([...beforeMap.keys(), ...afterMap.keys()])].sort()
+  const restartDeltas = []
+  const statusChanges = []
+  const missingAfter = []
+  const newContainers = []
+
+  allNames.forEach((name) => {
+    const previous = beforeMap.get(name)
+    const current = afterMap.get(name)
+
+    if (!current) {
+      missingAfter.push(name)
+      return
+    }
+
+    if (!previous) {
+      newContainers.push(name)
+    } else if (previous.status !== current.status) {
+      statusChanges.push({
+        name,
+        beforeStatus: previous.status,
+        afterStatus: current.status
+      })
+    }
+
+    const beforeRestart = previous?.restartCount || 0
+    const afterRestart = current.restartCount || 0
+    if (afterRestart > beforeRestart) {
+      restartDeltas.push({
+        name,
+        beforeRestart,
+        afterRestart,
+        delta: afterRestart - beforeRestart
+      })
+    }
+  })
+
+  const hints = []
+  if (restartDeltas.length) {
+    restartDeltas.forEach((entry) => {
+      hints.push(`${entry.name} restart count increased by ${entry.delta} (${entry.beforeRestart} -> ${entry.afterRestart}).`)
+    })
+  }
+  if (missingAfter.length) {
+    hints.push(`Containers missing after run: ${missingAfter.join(', ')}.`)
+  }
+  if (newContainers.length) {
+    hints.push(`New containers detected after run: ${newContainers.join(', ')}.`)
+  }
+  if (after?.hints?.length) {
+    hints.push(...after.hints)
+  }
+
+  return {
+    timestamp: new Date().toISOString(),
+    project: after?.project || before?.project || 'unknown',
+    restartDeltas,
+    statusChanges,
+    missingAfter,
+    newContainers,
+    unstableBefore: Boolean(before?.unstable),
+    unstableAfter: Boolean(after?.unstable),
+    becameUnstable: !before?.unstable && Boolean(after?.unstable),
+    hints: [...new Set(hints)]
+  }
+}
+
+function summarizeComparison(comparison) {
+  const lines = []
+  lines.push(`Project: ${comparison.project}`)
+  lines.push(`Became unstable: ${comparison.becameUnstable}`)
+  lines.push(`Restart deltas: ${comparison.restartDeltas.length}`)
+  lines.push(`Status changes: ${comparison.statusChanges.length}`)
+  lines.push(`Missing after run: ${comparison.missingAfter.length}`)
+  lines.push(`New containers: ${comparison.newContainers.length}`)
+
+  if (comparison.restartDeltas.length) {
+    lines.push('Restart delta details:')
+    comparison.restartDeltas.forEach((entry) => {
+      lines.push(`  - ${entry.name}: +${entry.delta} (${entry.beforeRestart} -> ${entry.afterRestart})`)
+    })
+  }
+
+  if (comparison.statusChanges.length) {
+    lines.push('Status changes:')
+    comparison.statusChanges.forEach((entry) => {
+      lines.push(`  - ${entry.name}: ${entry.beforeStatus} -> ${entry.afterStatus}`)
+    })
+  }
+
+  if (comparison.hints.length) {
+    lines.push('Hints:')
+    comparison.hints.forEach((hint) => lines.push(`  - ${hint}`))
+  }
+
+  return lines.join('\n')
+}
+
+function writeComparisonReport(config, comparison, label = 'comparison') {
+  const dirPath = ensureReportsDir(config)
+  const safeLabel = String(label || 'comparison').replace(/[^a-zA-Z0-9_-]/g, '_')
+  const fileName = `shield-diagnostics-${safeLabel}-${Date.now()}.log`
+  const reportPath = path.join(dirPath, fileName)
+
+  const lines = []
+  lines.push(`timestamp=${comparison.timestamp}`)
+  lines.push(`project=${comparison.project}`)
+  lines.push(`unstableBefore=${comparison.unstableBefore}`)
+  lines.push(`unstableAfter=${comparison.unstableAfter}`)
+  lines.push(`becameUnstable=${comparison.becameUnstable}`)
+  lines.push('')
+
+  lines.push('restartDeltas:')
+  if (!comparison.restartDeltas.length) {
+    lines.push('  (none)')
+  } else {
+    comparison.restartDeltas.forEach((entry) => {
+      lines.push(`  - ${entry.name}: +${entry.delta} (${entry.beforeRestart} -> ${entry.afterRestart})`)
+    })
+  }
+
+  lines.push('')
+  lines.push('statusChanges:')
+  if (!comparison.statusChanges.length) {
+    lines.push('  (none)')
+  } else {
+    comparison.statusChanges.forEach((entry) => {
+      lines.push(`  - ${entry.name}: ${entry.beforeStatus} -> ${entry.afterStatus}`)
+    })
+  }
+
+  lines.push('')
+  lines.push('missingAfter:')
+  lines.push(comparison.missingAfter.length ? `  - ${comparison.missingAfter.join('\n  - ')}` : '  (none)')
+
+  lines.push('')
+  lines.push('newContainers:')
+  lines.push(comparison.newContainers.length ? `  - ${comparison.newContainers.join('\n  - ')}` : '  (none)')
+
+  lines.push('')
+  lines.push('hints:')
+  lines.push(comparison.hints.length ? `  - ${comparison.hints.join('\n  - ')}` : '  (none)')
+
+  fs.writeFileSync(reportPath, `${lines.join('\n')}\n`, 'utf8')
+  return reportPath
+}
+
 module.exports = {
   collectDiagnostics,
+  compareDiagnostics,
+  writeComparisonReport,
   writeDiagnosticsReport,
+  summarizeComparison,
   summarizeDiagnostics
 };

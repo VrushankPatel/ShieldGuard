@@ -229,16 +229,21 @@ for (const ticket of tickets) {
     console.log(`[created] ${ticket.key} -> ${issueUrl}`);
   }
 
-  runGh([
-    'project',
-    'item-add',
-    String(projectNumber),
-    '--owner',
-    owner,
-    '--url',
-    issueUrl
-  ]);
-  console.log(`[project] added ${ticket.key} to project #${projectNumber}`);
+  try {
+    runGh([
+      'project',
+      'item-add',
+      String(projectNumber),
+      '--owner',
+      owner,
+      '--url',
+      issueUrl
+    ]);
+    console.log(`[project] added ${ticket.key} to project #${projectNumber}`);
+  } catch (error) {
+    console.warn(`[project] failed to add ${ticket.key}: ${error.message}`);
+    console.warn('Tip: run `gh auth refresh -h github.com -s project` and rerun this script.');
+  }
 }
 
 console.log('Done.');

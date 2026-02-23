@@ -66,6 +66,8 @@ ShieldGuard/
     │   └── root-bootstrap-hardening.e2e.test.js
     ├── onboarding/
     │   └── tenant-onboarding.e2e.test.js
+    ├── helpdesk-emergency/
+    │   └── helpdesk-emergency-flows.e2e.test.js
     └── visitor/
         └── visitor-gatepass-flows.e2e.test.js
 ```
@@ -159,6 +161,12 @@ Run only amenities and meeting lifecycle checks:
 
 ```bash
 npm run test:e2e:amenities-meeting
+```
+
+Run only helpdesk and emergency lifecycle checks:
+
+```bash
+npm run test:e2e:helpdesk-emergency
 ```
 
 ## CI Pipeline
@@ -284,6 +292,15 @@ Detailed interpretation is documented in `docs/DIAGNOSTICS_GUIDE.md`.
   - Verifies minutes lookup is rejected when no minutes exist for a meeting.
 - `executes meeting start, minutes publish, approval, and closure flow`
   - Covers meeting status progression (`SCHEDULED -> ONGOING -> COMPLETED`), minutes creation/approval, and reminder lifecycle.
+
+### `helpdesk-emergency-flows.e2e.test.js`
+
+- `drives helpdesk ticket through assignment, resolution, rating, and reopen`
+  - Covers category creation, ticket lifecycle transitions, comment and attachment flows.
+- `rejects invalid helpdesk transitions and unauthenticated category creation`
+  - Verifies rating is rejected for unresolved tickets and category creation requires authorization.
+- `drives emergency alert and safety inspection workflows with rejection checks`
+  - Covers emergency contact creation, safety equipment/inspection creation, SOS raise/respond/resolve lifecycle, and invalid equipment rejection path.
 
 ## Notes
 

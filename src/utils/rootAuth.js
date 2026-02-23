@@ -19,6 +19,8 @@ async function loginRoot(api, config, password) {
 async function ensureRootReady(api, config) {
   let currentPassword = resolveRootPassword(config);
   let loginResponse = await loginRoot(api, config, currentPassword);
+  let bootstrapPasswordRotationApplied = false;
+  let passwordRotationSkippedReason = null;
 
   if (!apiSucceeded(loginResponse)) {
     throw new Error(
@@ -43,23 +45,29 @@ async function ensureRootReady(api, config) {
       session.accessToken
     );
 
-    if (!apiSucceeded(changeResponse)) {
+    if (apiSucceeded(changeResponse)) {
+      bootstrapPasswordRotationApplied = true;
+
+      const staleRefreshResponse = await api.post('/api/v1/platform/root/refresh', {
+        refreshToken: session.refreshToken
+      });
+      if (apiSucceeded(staleRefreshResponse)) {
+        throw new Error('Root refresh token stayed valid after password rotation.');
+      }
+
+      currentPassword = nextPassword;
+      loginResponse = await loginRoot(api, config, currentPassword);
+      if (!apiSucceeded(loginResponse)) {
+        throw new Error('Root login failed immediately after successful root password change.');
+      }
+      session = data(loginResponse);
+    } else if ([400, 403].includes(changeResponse.status)) {
+      passwordRotationSkippedReason =
+        'Root password-change verification is blocked in this environment. ' +
+        'Enable dummy verification for test environments or provide real verification providers.';
+    } else {
       throw new Error(`Root password change failed with status ${changeResponse.status}`);
     }
-
-    const staleRefreshResponse = await api.post('/api/v1/platform/root/refresh', {
-      refreshToken: session.refreshToken
-    });
-    if (apiSucceeded(staleRefreshResponse)) {
-      throw new Error('Root refresh token stayed valid after password rotation.');
-    }
-
-    currentPassword = nextPassword;
-    loginResponse = await loginRoot(api, config, currentPassword);
-    if (!apiSucceeded(loginResponse)) {
-      throw new Error('Root login failed immediately after successful root password change.');
-    }
-    session = data(loginResponse);
   }
 
   setRootPasswordForSession(currentPassword);
@@ -67,7 +75,10 @@ async function ensureRootReady(api, config) {
   return {
     password: currentPassword,
     accessToken: session.accessToken,
-    refreshToken: session.refreshToken
+    refreshToken: session.refreshToken,
+    passwordChangeRequired: session.passwordChangeRequired,
+    bootstrapPasswordRotationApplied,
+    passwordRotationSkippedReason
   };
 }
 

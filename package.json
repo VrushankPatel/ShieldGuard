@@ -8,10 +8,12 @@
   },
   "scripts": {
     "test": "npm run test:e2e",
-    "test:e2e": "jest --runInBand --config jest.config.cjs",
+    "test:e2e": "node scripts/run-e2e-with-diagnostics.cjs",
+    "test:e2e:raw": "jest --runInBand --config jest.config.cjs",
     "test:e2e:watch": "jest --watch --config jest.config.cjs",
     "shield:start": "node scripts/shield-runtime.cjs start",
-    "shield:stop": "node scripts/shield-runtime.cjs stop"
+    "shield:stop": "node scripts/shield-runtime.cjs stop",
+    "shield:inspect": "node scripts/inspect-containers.cjs --logs"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

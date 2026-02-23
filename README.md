@@ -28,6 +28,8 @@ ShieldGuard/
 ├── package.json
 ├── jest.config.cjs
 ├── scripts/
+│   ├── inspect-containers.cjs
+│   ├── run-e2e-with-diagnostics.cjs
 │   └── shield-runtime.cjs
 ├── src/
 │   ├── clients/
@@ -38,6 +40,7 @@ ShieldGuard/
 │   │   ├── abstractApiTest.js
 │   │   └── shieldRuntimeManager.js
 │   └── utils/
+│       ├── containerDiagnostics.js
 │       ├── dataFactory.js
 │       ├── polling.js
 │       ├── rootAuth.js
@@ -78,6 +81,7 @@ Manual commands:
 ```bash
 npm run shield:start
 npm run shield:stop
+npm run shield:inspect
 ```
 
 ## Install and Run
@@ -87,6 +91,22 @@ npm install
 cp .env.example .env
 npm run test:e2e
 ```
+
+Run raw Jest only (without pre/post container diagnostics):
+
+```bash
+npm run test:e2e:raw
+```
+
+## Crash Triage Workflow
+
+If SHIELD becomes unstable during test runs:
+1. Run `npm run shield:inspect` to capture container status and logs.
+2. Check generated reports under `ShieldGuard/reports/`.
+3. Look for restart loops, database auth errors, or startup exceptions.
+4. Re-run `npm run test:e2e` after fixing env/runtime mismatch.
+
+`test:e2e` captures diagnostics automatically before and after the suite.
 
 ## Test Catalog
 

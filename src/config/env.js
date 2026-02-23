@@ -36,6 +36,7 @@ function loadConfig() {
 
   return {
     shieldGuardRoot: SHIELD_GUARD_ROOT,
+    reportsDir: path.resolve(SHIELD_GUARD_ROOT, 'reports'),
     baseUrl: process.env.SHIELD_BASE_URL || 'http://localhost:8080',
     healthPath: process.env.SHIELD_HEALTH_PATH || '/actuator/info',
     autostart: parseBoolean(process.env.SHIELD_AUTOSTART, true),

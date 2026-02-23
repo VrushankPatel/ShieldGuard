@@ -11,6 +11,7 @@
     "test:e2e": "node scripts/run-e2e-with-diagnostics.cjs",
     "test:e2e:raw": "jest --runInBand --config jest.config.cjs",
     "test:e2e:billing": "jest --runInBand --config jest.config.cjs tests/billing/billing-payments-contract-smoke.e2e.test.js",
+    "test:e2e:visitor": "jest --runInBand --config jest.config.cjs tests/visitor/visitor-gatepass-flows.e2e.test.js",
     "test:e2e:watch": "jest --watch --config jest.config.cjs",
     "shield:start": "node scripts/shield-runtime.cjs start",
     "shield:stop": "node scripts/shield-runtime.cjs stop",

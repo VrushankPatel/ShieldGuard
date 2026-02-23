@@ -32,6 +32,10 @@ ShieldGuard/
 │   ├── inspect-containers.cjs
 │   ├── run-e2e-with-diagnostics.cjs
 │   └── shield-runtime.cjs
+├── docs/
+│   ├── DIAGNOSTICS_GUIDE.md
+│   ├── KANBAN_TICKETS_SG.md
+│   └── TEAM_ONBOARDING.md
 ├── src/
 │   ├── clients/
 │   │   └── shieldApiClient.js
@@ -161,10 +165,12 @@ npm run test:e2e:amenities-meeting
 If SHIELD becomes unstable during test runs:
 1. Run `npm run shield:inspect` to capture container status and logs.
 2. Check generated reports under `ShieldGuard/reports/`.
-3. Look for restart loops, database auth errors, or startup exceptions.
-4. Re-run `npm run test:e2e` after fixing env/runtime mismatch.
+3. Start from the latest `shield-diagnostics-delta-e2e-*.log` report to inspect restart deltas and status transitions.
+4. If run failed, inspect `shield-diagnostics-failure-e2e-*.log` for failure-context logs.
+5. Re-run `npm run test:e2e` after fixing env/runtime mismatch.
 
-`test:e2e` captures diagnostics automatically before and after the suite.
+`test:e2e` captures diagnostics automatically before/after the suite, plus delta reports and failure-context artifacts.
+Detailed interpretation is documented in `docs/DIAGNOSTICS_GUIDE.md`.
 
 ## Test Catalog
 

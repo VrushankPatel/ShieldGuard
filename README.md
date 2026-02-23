@@ -10,6 +10,11 @@ This suite currently targets:
 - society onboarding through root APIs
 - admin authentication and protected endpoint access
 - OpenAPI-driven billing/payment smoke coverage
+- accounting and treasury operation flows
+- staff attendance and payroll processing flows
+- utility monitoring and marketplace transaction flows
+- communication module lifecycle flows
+- config, document repository, and analytics governance flows
 - admin refresh token rotation (`/auth/refresh` and `/auth/refresh-token`)
 - session invalidation on logout
 - session invalidation on password change
@@ -48,11 +53,14 @@ ShieldGuard/
 │   └── utils/
 │       ├── containerDiagnostics.js
 │       ├── dataFactory.js
+│       ├── flowHarness.js
 │       ├── openApiContract.js
 │       ├── polling.js
 │       ├── rootAuth.js
 │       └── rootCredential.js
 └── tests/
+    ├── accounting/
+    │   └── accounting-treasury-flows.e2e.test.js
     ├── amenities-meeting/
     │   └── amenities-meeting-flows.e2e.test.js
     ├── asset-complaint/
@@ -68,6 +76,14 @@ ShieldGuard/
     │   └── tenant-onboarding.e2e.test.js
     ├── helpdesk-emergency/
     │   └── helpdesk-emergency-flows.e2e.test.js
+    ├── communication/
+    │   └── communication-flows.e2e.test.js
+    ├── config-document-analytics/
+    │   └── config-document-analytics-flows.e2e.test.js
+    ├── staff-payroll/
+    │   └── staff-payroll-flows.e2e.test.js
+    ├── utility-marketplace/
+    │   └── utility-marketplace-flows.e2e.test.js
     └── visitor/
         └── visitor-gatepass-flows.e2e.test.js
 ```
@@ -167,6 +183,36 @@ Run only helpdesk and emergency lifecycle checks:
 
 ```bash
 npm run test:e2e:helpdesk-emergency
+```
+
+Run only accounting and treasury lifecycle checks:
+
+```bash
+npm run test:e2e:accounting
+```
+
+Run only staff and payroll lifecycle checks:
+
+```bash
+npm run test:e2e:staff-payroll
+```
+
+Run only utility and marketplace lifecycle checks:
+
+```bash
+npm run test:e2e:utility-marketplace
+```
+
+Run only communication lifecycle checks:
+
+```bash
+npm run test:e2e:communication
+```
+
+Run only config, document, and analytics lifecycle checks:
+
+```bash
+npm run test:e2e:config-document-analytics
 ```
 
 ## CI Pipeline
@@ -301,6 +347,44 @@ Detailed interpretation is documented in `docs/DIAGNOSTICS_GUIDE.md`.
   - Verifies rating is rejected for unresolved tickets and category creation requires authorization.
 - `drives emergency alert and safety inspection workflows with rejection checks`
   - Covers emergency contact creation, safety equipment/inspection creation, SOS raise/respond/resolve lifecycle, and invalid equipment rejection path.
+
+### `accounting-treasury-flows.e2e.test.js`
+
+- `drives account heads, funds, ledgers, expenses, and vendor payments lifecycle`
+  - Covers account head creation, fund categories, budgets, ledger entries, expense approval, vendor payment states, and financial reports.
+  - Verifies both modern (`/ledger-entries`) and legacy (`/ledger`) accounting surfaces in one flow.
+- `rejects unauthenticated accounting writes and invalid resource lookups`
+  - Verifies protected write endpoints reject unauthenticated traffic.
+  - Verifies not-found semantics for invalid resource IDs.
+
+### `staff-payroll-flows.e2e.test.js`
+
+- `drives staff attendance to payroll generation, processing, and approval lifecycle`
+  - Covers staff onboarding, payroll components, salary structures, attendance check-in/out, payroll generation, processing, approval, and payslip retrieval.
+- `drives staff leave approval and exports with access-control checks`
+  - Covers leave request to approval flow and leave balance checks.
+  - Verifies role-protected CSV export access behavior.
+
+### `utility-marketplace-flows.e2e.test.js`
+
+- `tracks complete utility lifecycle across water, electricity, and generator logs`
+  - Covers tank setup, water logs/charting, meter and reading logs, and diesel generator runtime summaries.
+- `drives marketplace listing, inquiry, and carpool flow with ownership checks`
+  - Covers listing creation, inquiry flow, ownership-enforced sell transition, view incrementing, and carpool route discovery.
+
+### `communication-flows.e2e.test.js`
+
+- `drives announcement lifecycle with attachment, publish, read receipt, and statistics`
+  - Covers announcement creation, attachments, publish flow, resident read receipts, and admin statistics access.
+- `drives polls, newsletters, notifications, and preference updates lifecycle`
+  - Covers poll vote lifecycle, newsletter publish/archive-by-year, notification read semantics, and preference updates.
+
+### `config-document-analytics-flows.e2e.test.js`
+
+- `drives tenant config, module settings, and document repository lifecycle`
+  - Covers tenant config upsert/bulk update, module toggles, billing formula config, and document category/document lifecycle.
+- `drives report templates, scheduled reports, dashboards, and analytics endpoints`
+  - Covers report template execution, scheduled report send-now, dashboard defaulting, and core analytics endpoint verification with seeded operational data.
 
 ## Notes
 

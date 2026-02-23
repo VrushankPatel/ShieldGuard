@@ -125,8 +125,6 @@ Manual commands:
 npm run shield:start
 npm run shield:stop
 npm run shield:inspect
-# requires authenticated gh + GH_PROJECT_NUMBER
-node scripts/create-kanban-issues.cjs
 ```
 
 ## Install and Run

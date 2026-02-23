@@ -160,6 +160,18 @@ Run only amenities and meeting lifecycle checks:
 npm run test:e2e:amenities-meeting
 ```
 
+## CI Pipeline
+
+GitHub Actions workflow: `.github/workflows/ci.yml`
+
+- Triggers on pull requests to `master` and pushes to `master`.
+- Checks out both repositories:
+  - `ShieldGuard` (this repo)
+  - `shield` backend (for runtime + API under test)
+- Builds SHIELD backend jar with Maven.
+- Runs `npm run test:e2e` with ShieldGuard diagnostics enabled.
+- Always uploads diagnostics artifacts (`reports/` and generated topology configs), including failure-context snapshots when runs fail.
+
 ## Crash Triage Workflow
 
 If SHIELD becomes unstable during test runs:

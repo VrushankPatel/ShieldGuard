@@ -48,6 +48,8 @@ ShieldGuard/
 │       ├── rootAuth.js
 │       └── rootCredential.js
 └── tests/
+    ├── asset-complaint/
+    │   └── asset-complaint-workflows.e2e.test.js
     ├── billing/
     │   └── billing-payments-contract-smoke.e2e.test.js
     ├── auth/
@@ -123,6 +125,12 @@ Run only visitor/gate-pass scenario checks:
 npm run test:e2e:visitor
 ```
 
+Run only asset/complaint workflow checks:
+
+```bash
+npm run test:e2e:asset-complaint
+```
+
 ## Crash Triage Workflow
 
 If SHIELD becomes unstable during test runs:
@@ -193,6 +201,15 @@ If SHIELD becomes unstable during test runs:
   - In strict environments where root onboarding is blocked, emits actionable setup guidance for `SHIELD_ADMIN_EMAIL` and `SHIELD_ADMIN_PASSWORD`.
 - `blocks unauthenticated visitor pass creation requests`
   - Verifies unauthenticated callers cannot create visitor passes.
+
+### `asset-complaint-workflows.e2e.test.js`
+
+- `creates asset and drives complaint through explicit lifecycle transitions`
+  - Covers category and asset creation, complaint registration, assign/resolve/close transitions.
+  - Asserts status progression explicitly (`OPEN -> ASSIGNED -> RESOLVED -> CLOSED`).
+- `rejects invalid asset references in complaint workflows`
+  - Verifies complaint creation with invalid asset IDs is rejected.
+  - Verifies missing asset lookup returns `404`.
 
 ## Notes
 

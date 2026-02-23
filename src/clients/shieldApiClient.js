@@ -38,6 +38,14 @@ class ShieldApiClient {
 
     return request.send(body || {});
   }
+
+  delete(path, accessToken) {
+    let request = this.client.delete(path).set('Accept', 'application/json');
+    if (accessToken) {
+      request = request.set('Authorization', `Bearer ${accessToken}`);
+    }
+    return request;
+  }
 }
 
 module.exports = {

@@ -9,6 +9,7 @@ This suite currently targets:
 - root endpoint access control
 - society onboarding through root APIs
 - admin authentication and protected endpoint access
+- OpenAPI-driven billing/payment smoke coverage
 - admin refresh token rotation (`/auth/refresh` and `/auth/refresh-token`)
 - session invalidation on logout
 - session invalidation on password change
@@ -42,10 +43,13 @@ ShieldGuard/
 │   └── utils/
 │       ├── containerDiagnostics.js
 │       ├── dataFactory.js
+│       ├── openApiContract.js
 │       ├── polling.js
 │       ├── rootAuth.js
 │       └── rootCredential.js
 └── tests/
+    ├── billing/
+    │   └── billing-payments-contract-smoke.e2e.test.js
     ├── auth/
     │   ├── admin-auth-session.e2e.test.js
     │   ├── root-auth.e2e.test.js
@@ -103,6 +107,12 @@ Run raw Jest only (without pre/post container diagnostics):
 npm run test:e2e:raw
 ```
 
+Run only billing/payment OpenAPI smoke checks:
+
+```bash
+npm run test:e2e:billing
+```
+
 ## Crash Triage Workflow
 
 If SHIELD becomes unstable during test runs:
@@ -154,6 +164,16 @@ If SHIELD becomes unstable during test runs:
 - `allows onboarded admin login and protected route access in tenant scope`
   - Validates `/users` and `/users/{id}` using newly onboarded admin credentials.
   - In strict verification-gated environments, verifies admin login is rejected because onboarding is blocked.
+
+### `billing-payments-contract-smoke.e2e.test.js`
+
+- `discovers billing/payment smoke endpoints from OpenAPI`
+  - Reads SHIELD OpenAPI spec from the SHIELD repository and derives smoke endpoint list.
+- `rejects unauthenticated access on protected billing/payment endpoints`
+  - Verifies unauthorized requests on discovered endpoints return `401` or `403`.
+- `returns contract-aligned responses for root-authenticated billing/payment smoke calls`
+  - Verifies root-authenticated smoke calls return expected status and API envelope.
+  - Emits endpoint-specific mismatch summaries when status/envelope diverge from contract expectations.
 
 ## Notes
 
